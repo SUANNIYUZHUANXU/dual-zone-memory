@@ -209,7 +209,7 @@ $$
 \text{Cost} \propto O(k), \quad k \ll n
 $$
 
-where $ k $ is the number of local neurons updated per write trigger (typically < 100), **which does not grow with context length**. This is not “saving,” this is **“circumventing”** — bypassing the entire exponential growth path.
+where $k$ is the number of local neurons updated per write trigger (typically < 100), **which does not grow with context length**. This is not “saving,” this is **“circumventing”** — bypassing the entire exponential growth path.
 
 ---
 
@@ -272,12 +272,12 @@ Score = a \cdot F + b \cdot A + c \cdot I
 $$
 
 where:
-- $ F $ = normalized frequency count (`access_count / max_access_count`)
-- $ A $ = normalized maximum association similarity
-- $ I $ = normalized inference path confidence (if no triggering inference path exists, this term is 0)
-- $ a, b, c $ are weight coefficients and $ a + b + c = 1 $ (the preferred ratio is $ a = 0.4, b = 0.35, c = 0.25 $)
+- $F$ = normalized frequency count (`access_count / max_access_count`)
+- $A$ = normalized maximum association similarity
+- $I$ = normalized inference path confidence (if no triggering inference path exists, this term is 0)
+- $a, b, c$ are weight coefficients and $a + b + c = 1$ (the preferred ratio is $a = 0.4, b = 0.35, c = 0.25$)
 
-A record obtains “write candidate” status **if and only if** $ Score > \theta $ (where $ \theta $ is the global write threshold, default 0.75). In addition, a **dual verification** mechanism must be satisfied: precise match count ≥ 3 and maximum association similarity ≥ 0.8 before the final write can be triggered.
+A record obtains “write candidate” status **if and only if** $Score > \theta$ (where $\theta$ is the global write threshold, default 0.75). In addition, a **dual verification** mechanism must be satisfied: precise match count ≥ 3 and maximum association similarity ≥ 0.8 before the final write can be triggered.
 
 #### 3.1.4 Lifecycle Management
 
@@ -290,10 +290,10 @@ A record obtains “write candidate” status **if and only if** $ Score > \thet
 The core operations of the short‑term cache include storage, query, and association mapping:
 
 - **Storage (write to cache)** : Each record write is an O(1) operation (hash table insertion).
-- **Exact match query (frequency counting)** : Traversing all records in the cache for entity‑action pair matching has complexity $ O(M) $, where $ M $ is the current number of records in the cache. $ M $ is limited by the “clear‑on‑session‑end” and “clear‑after‑write” mechanisms, with a default upper limit of 256 entries, making this operation constant‑level in engineering practice.
-- **Association mapping (nearest neighbor search)** : Performing k‑NN search of the semantic vector against already‑written concepts in deeper FFN layers, using FAISS indexing, has complexity $ O(\log N) $, where $ N $ is the total number of already‑written concepts. $ N $ grows linearly with usage time, but the search process runs on the GPU with controllable per‑query latency.
+- **Exact match query (frequency counting)** : Traversing all records in the cache for entity‑action pair matching has complexity $O(M)$, where $M$ is the current number of records in the cache. $M$ is limited by the “clear‑on‑session‑end” and “clear‑after‑write” mechanisms, with a default upper limit of 256 entries, making this operation constant‑level in engineering practice.
+- **Association mapping (nearest neighbor search)** : Performing k‑NN search of the semantic vector against already‑written concepts in deeper FFN layers, using FAISS indexing, has complexity $O(\log N)$, where $N$ is the total number of already‑written concepts. $N$ grows linearly with usage time, but the search process runs on the GPU with controllable per‑query latency.
 
-Overall, the total complexity for processing a single short‑term cache entry is $ O(M + \log N) $, where $ M $ has an upper bound, and the scale of $ N $ needs to be capped based on hardware conditions in actual deployment (e.g., $ N \le 10^6 $).
+Overall, the total complexity for processing a single short‑term cache entry is $O(M + \log N)$, where $M$ has an upper bound, and the scale of $N$ needs to be capped based on hardware conditions in actual deployment (e.g., $N\le 10^6$).
 
 ---
 
@@ -344,7 +344,7 @@ When “apple juice” is recognized as a derivative, it is **not** counted towa
 
 1. **First occurrence**: The derivative is recognized, an independent counter is created with initial value = 1, but no write is triggered (threshold not yet met).
 2. **Multiple repetitions**: Each subsequent occurrence of the derivative increments its independent counter.
-3. **Threshold‑reaching write**: When the derivative's independent counter reaches the global threshold $ \theta $ (sharing the same threshold system as entities), it triggers a physical write of the derivative, making it an **independent new concept** in the deeper FFN layers.
+3. **Threshold‑reaching write**: When the derivative's independent counter reaches the global threshold $\theta$ (sharing the same threshold system as entities), it triggers a physical write of the derivative, making it an **independent new concept** in the deeper FFN layers.
 
 ```python
 # Pseudocode: Derivative independent counter logic
@@ -369,7 +369,7 @@ Score = 0.4 \cdot F + 0.35 \cdot A + 0.25 \cdot I
 $$
    
    where
-   $ F $ is the normalized frequency value of the corresponding entity (current frequency / global maximum frequency).
+   $F$ is the normalized frequency value of the corresponding entity (current frequency / global maximum frequency).
 
 3. **Dual verification precondition**: Frequency count serves as a precondition for the “dual verification” mechanism — the exact entity count must be ≥ 3 (i.e., the same entity has been mentioned precisely or with weighted counts at least 3 times) before it can enter the write candidate sequence. This precondition effectively prevents one‑off inputs from being mistakenly written into deep memory (this can later also serve as a “memory strength adjustment knob”).
 
@@ -377,9 +377,9 @@ $$
 
 #### 3.2.5 Setting the Global Write Threshold θ
 
-The global write threshold $ \theta $ controls “how many times a concept needs to be mentioned before it is worth writing into long‑term memory.” The initial setting is $ \theta = 0.75 $.
+The global write threshold $\theta$ controls “how many times a concept needs to be mentioned before it is worth writing into long‑term memory.” The initial setting is $\theta = 0.75$.
 
-> **Supplementary Note on the Threshold's Meaning**: $ \theta $ here serves as the threshold for “local write decisions.” Its design value is not arbitrary, but aims to balance “remembering new information as early as possible” against “avoiding being overwhelmed by noise.” This value can be dynamically adjusted during the prototype validation phase, and later can also serve as a “personality adjustment knob” — a higher threshold makes the AI “cautious and conservative,” while a lower threshold makes it “sensitive and easily influenced.”
+> **Supplementary Note on the Threshold's Meaning**: $\theta$ here serves as the threshold for “local write decisions.” Its design value is not arbitrary, but aims to balance “remembering new information as early as possible” against “avoiding being overwhelmed by noise.” This value can be dynamically adjusted during the prototype validation phase, and later can also serve as a “personality adjustment knob” — a higher threshold makes the AI “cautious and conservative,” while a lower threshold makes it “sensitive and easily influenced.”
 
 **Why choose 0.75?**
 
@@ -389,7 +389,7 @@ The global write threshold $ \theta $ controls “how many times a concept needs
 
 #### 3.2.6 Complexity Analysis
 
-The core operation of the frequency counter is performing hierarchical matching of the current record's `entities_actions` against all existing counter entries. Let $ E $ be the total number of current entity counters; then the complexity per match is $ O(E) $ (traversing all counters). $ E $ is constrained by the threshold $ \theta $ and the “clear‑after‑write” mechanism, and in the long run stabilizes at the order of “frequently mentioned concepts,” rather than growing indefinitely.
+The core operation of the frequency counter is performing hierarchical matching of the current record's `entities_actions` against all existing counter entries. Let $E$ be the total number of current entity counters; then the complexity per match is $O(E)$ (traversing all counters). $E$ is constrained by the threshold $\theta$ and the “clear‑after‑write” mechanism, and in the long run stabilizes at the order of “frequently mentioned concepts,” rather than growing indefinitely.
 
 Detailed matching costs per level:
 
@@ -398,11 +398,11 @@ Detailed matching costs per level:
 - L3 event match (main noun + verb combination): requires parsing the main noun and verb, with per‑operation cost O(L).
 - L4 derivative match (root recognition): requires lookup in the derivative mapping table, O(1) hash lookup.
 
-Therefore, the total cost for a single record passing through the complete counting pipeline is O(E + L), where $ E $ is the number of counters corresponding to that entity, and $ L $ is the text length.
+Therefore, the total cost for a single record passing through the complete counting pipeline is O(E + L), where $E$ is the number of counters corresponding to that entity, and $L$ is the text length.
 
 #### 3.2.7 Section Summary
 
-The frequency counter is the first sieve between “experience” and “memory” in our architecture. It distinguishes repetition signals of different strengths through **four‑level matching rules**, ensures derivatives are not overwhelmed or conflated through the **independent counter mechanism**, and guarantees that write decisions are well‑grounded through the **dual‑verification precondition** and the $ \theta $ threshold.
+The frequency counter is the first sieve between “experience” and “memory” in our architecture. It distinguishes repetition signals of different strengths through **four‑level matching rules**, ensures derivatives are not overwhelmed or conflated through the **independent counter mechanism**, and guarantees that write decisions are well‑grounded through the **dual‑verification precondition** and the $\theta$ threshold.
 
 In the next module (3.3 Write Executor), we will actually write the information judged as “worth remembering” into the physical weights of the FFN layers.
 
@@ -429,7 +429,7 @@ When a record is judged as “worth writing,” the system needs to answer a cor
 Our solution adopts **“Activation‑based Selection”** , with the following specific process:
 
 1. **Obtain activations through forward propagation**: Input the record to be written (the current input) into the model, perform one forward pass, and record the activation values of all neurons in the target FFN layer.
-2. **Sort and select Top‑K**: Sort by activation values in descending order, and select the top $ K $ neurons with the highest activations ($ K $ is a preset constant, default **10**).
+2. **Sort and select Top‑K**: Sort by activation values in descending order, and select the top $K$ neurons with the highest activations ($K$ is a preset constant, default **10**).
 3. **Lock writing targets**: These K neurons become the target weight positions for this write.
 
 > **Why Top‑K?** When the human brain learns new information, it does not reconstruct the entire neural network, but rather **strengthens a specific set of synaptic connections**. Top‑K selection simulates this principle: only modifying the neurons most relevant to the new information, minimizing the impact scope of the write.
@@ -438,7 +438,7 @@ Our solution adopts **“Activation‑based Selection”** , with the following 
 
 Traditional fine‑tuning relies on **backpropagating gradients**, requiring traversal of the entire model with high cost. Our Write Executor adopts a **gradient‑free heuristic update**, bypassing backpropagation and achieving constant‑level computational overhead.
 
-For each selected target neuron $ i $, the weight update formula is:
+For each selected target neuron $i$, the weight update formula is:
 
 $$
 w_{i}^{new} = w_{i}^{old} + \eta \cdot a_i
@@ -446,11 +446,11 @@ $$
 
 where:
 
-- $ w_i $ is the weight vector of the neuron
-- $ a_i $ is the activation value (scalar) of the neuron under the current input
-- $ \eta $ is the write learning rate, default **1×10⁻⁵**
+- $w_i$ is the weight vector of the neuron
+- $a_i$ is the activation value (scalar) of the neuron under the current input
+- $\eta$ is the write learning rate, default **1×10⁻⁵**
 
-**Why must the learning rate be extremely small?** A single write can only cause a weight change on the order of $ 10^{-5} $. Only when the same set of concepts is **written repeatedly many times** (i.e., multiple trigger events) will the weights gradually accumulate noticeable changes — this forms a closed loop with the “frequency threshold” design logic.
+**Why must the learning rate be extremely small?** A single write can only cause a weight change on the order of $10^{-5}$. Only when the same set of concepts is **written repeatedly many times** (i.e., multiple trigger events) will the weights gradually accumulate noticeable changes — this forms a closed loop with the “frequency threshold” design logic.
 
 **Why is no gradient needed?** Because the goal of our architecture is to **“reinforce existing patterns,”** not to “learn entirely new tasks.” The activation value itself already contains information about “the strength of association between the current input and this neuron” — the larger the activation, the higher the relevance of this neuron to the current concept, and adjusting its weight in that direction constitutes reinforcement.
 
@@ -460,11 +460,11 @@ To prevent write operations from causing model collapse, the system integrates *
 
 | Safety Lock                    | Trigger Condition                                            | Action                                                       | Analogy                                             |
 | :----------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- | :-------------------------------------------------- |
-| **Lock 1: Magnitude Clipping** | The weight change of a single update exceeds the preset upper limit (preferred: $ \Delta_{max} $) | Linearly scale the update magnitude to within the limit      | Take only a small step each time to avoid falling   |
-| **Lock 2: Norm Constraint**    | The Euclidean distance between the modified neuron's weight vector and its original vector exceeds the preset distance upper limit (preferred: $ D_{max} $) | Proportionally shrink the weight vector back to the safe radius | Keep the weight “in a cage” so it can't run far     |
+| **Lock 1: Magnitude Clipping** | The weight change of a single update exceeds the preset upper limit (preferred: $\Delta_{max}$) | Linearly scale the update magnitude to within the limit      | Take only a small step each time to avoid falling   |
+| **Lock 2: Norm Constraint**    | The Euclidean distance between the modified neuron's weight vector and its original vector exceeds the preset distance upper limit (preferred: $D_{max}$) | Proportionally shrink the weight vector back to the safe radius | Keep the weight “in a cage” so it can't run far     |
 | **Lock 3: Immediate Rollback** | Significant deviation appears in the output of a universal test sample (e.g., “1+1=？”) run immediately after writing | Undo all write operations and restore original weights       | Take a small sip first to confirm it's not poisoned |
 
-**Quantitative standard for Lock 3's trigger condition**: The **change in the output probability distribution (KL divergence)** on the test sample is used as the metric. (Preferred: if the KL divergence before and after writing on a standard test sample exceeds $ 0.01 $), the write is judged as anomalous and rollback is triggered.
+**Quantitative standard for Lock 3's trigger condition**: The **change in the output probability distribution (KL divergence)** on the test sample is used as the metric. (Preferred: if the KL divergence before and after writing on a standard test sample exceeds 0.01), the write is judged as anomalous and rollback is triggered.
 
 **Figure 3: Data Write Flowchart of the Write Executor and Cooperative Lock Mechanism**
 
@@ -489,11 +489,11 @@ def write_to_ffn(model, layer_idx, neuron_indices, activations, lr):
 
 The write executor comprises three main operations: forward pass to obtain activation values, Top‑K selection, and weight update.
 
-- **Forward pass**: Requires feeding the current input through the model and computing the activation values of the target FFN layer. The complexity is the same as a single model inference, i.e., $ O(P) $, where $ P $ is the number of model parameters. However, this operation is only executed when a write is triggered (not on every inference), and it can share computation results with the normal inference path.
-- **Top‑K selection**: Sorting all neuron activation values and picking the top K. If using a quick‑selection algorithm, the complexity is $ O(D) $, where $ D $ is the total number of neurons in that FFN layer (typically several times the model's hidden dimension). Using `torch.topk`, the actual efficiency is close to $ O(D) $.
-- **Weight update**: Modifies only K neurons, each write is $ O(K) $, with K being a constant (default 10), effectively $ O(1) $.
+- **Forward pass**: Requires feeding the current input through the model and computing the activation values of the target FFN layer. The complexity is the same as a single model inference, i.e., $O(P)$, where $P$ is the number of model parameters. However, this operation is only executed when a write is triggered (not on every inference), and it can share computation results with the normal inference path.
+- **Top‑K selection**: Sorting all neuron activation values and picking the top K. If using a quick‑selection algorithm, the complexity is $O(D)$, where $D$ is the total number of neurons in that FFN layer (typically several times the model's hidden dimension). Using `torch.topk`, the actual efficiency is close to $O(D)$.
+- **Weight update**: Modifies only K neurons, each write is $O(K)$, with K being a constant (default 10), effectively $O(1)$.
 
-Overall, the total complexity of a single write operation is $ O(P + D) $. Although the absolute values of P and D are large, the write frequency is strictly limited by the frequency counter threshold $ \theta $ (only triggered when a concept has been repeated ≥ 3 times and Score ≥ 0.75). Therefore, the actual compute overhead in practice is far lower than the global backpropagation required during the training phase.
+Overall, the total complexity of a single write operation is $O(P + D)$. Although the absolute values of P and D are large, the write frequency is strictly limited by the frequency counter threshold $\theta$ (only triggered when a concept has been repeated ≥ 3 times and Score ≥ 0.75). Therefore, the actual compute overhead in practice is far lower than the global backpropagation required during the training phase.
 
 #### 3.3.7 Section Summary
 
@@ -585,7 +585,7 @@ $$
 \Delta H_{stem} = \sum_{d \in derivatives} \lambda_{d} \cdot \mathrm{write\_count}_d
 $$
 
-where $ \lambda_d $ is the “semantic affinity” coefficient of the derivative to the original word (determined by vector similarity). When the cumulative dilution signal on the original stem exceeds its own threshold, the system triggers a write event for the stem as well.
+where $\lambda_d$ is the “semantic affinity” coefficient of the derivative to the original word (determined by vector similarity). When the cumulative dilution signal on the original stem exceeds its own threshold, the system triggers a write event for the stem as well.
 
 **Theoretical significance**: If this mechanism holds, it would demonstrate that “knowledge can be indirectly reinforced through peripheral associations,” simulating the human brain's “learning by analogy” ability. Moreover, it extends naturally from our architecture's existing frequency counting and writing logic, without introducing new paradigms.
 
@@ -603,7 +603,7 @@ $$
 w_{new} = w_{old} - \beta \cdot \text{Activation}
 $$
 
-where $ \beta $ is the forgetting strength coefficient, controlling the degree of weakening. This operation does not rely on retraining or RLHF, can be completed entirely during inference, and does not significantly affect the model's other knowledge.
+where $\beta$ is the forgetting strength coefficient, controlling the degree of weakening. This operation does not rely on retraining or RLHF, can be completed entirely during inference, and does not significantly affect the model's other knowledge.
 
 **Applicable scenarios**: The negative writing mechanism is suitable for:
 
