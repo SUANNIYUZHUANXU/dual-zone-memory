@@ -704,3 +704,16 @@ WeChat: l15951766149 (please indicate your purpose)
 Email: 327999898@qq.com
 
 Liu Kechen
+
+---
+
+## License & Commercial Use
+
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**. 
+It is free for personal research, non-commercial educational purposes, and open-source community development.
+
+**Commercial Use:** 
+If you wish to use this code, algorithms, or the associated patents (Application No. 2026111114738) for any commercial purpose (including internal R&D, commercial products, or paid services), you must obtain a separate commercial license. 
+
+For commercial licensing, please contact:
+Email: 327999898@qq.com
